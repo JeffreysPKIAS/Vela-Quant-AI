@@ -1,35 +1,32 @@
 import requests
+from datetime import datetime, timedelta
 
-def hole_news(api_key, suchbegriff="Fed", max_artikel=5):
-    url = f"https://newsapi.org/v2/everything?q={suchbegriff}&language=en&sortBy=publishedAt&pageSize={max_artikel}&apiKey={api_key}"
+def hole_news(api_key, suchbegriff="Fed", max_artikel=10):
+    if not api_key:
+        return ["❌ Fehler: Kein API-Key übergeben."]
+
+    von_datum = (datetime.now() - timedelta(days=7)).strftime("%Y-%m-%d")
+    url = (
+        f"https://newsapi.org/v2/everything?"
+        f"q={suchbegriff}&from={von_datum}&language=en&sortBy=publishedAt&"
+        f"pageSize={max_artikel}&apiKey={api_key}"
+    )
+
     response = requests.get(url)
 
     if response.status_code == 200:
         daten = response.json()
-        artikel = daten["articles"]
+        artikel = daten.get("articles", [])
         nachrichten = []
 
         for artikel in artikel:
-            titel = artikel["title"]
-            quelle = artikel["source"]["name"]
-            datum = artikel["publishedAt"]
-            link = artikel["url"]
-            nachrichten.append(f"📰 **{titel}**\nQuelle: {quelle}\nDatum: {datum}\n[Zur News]({link})\n")
+            nachrichten.append({
+                "title": artikel["title"],
+                "source": artikel["source"]["name"],
+                "publishedAt": artikel["publishedAt"],
+                "url": artikel["url"]
+            })
 
         return nachrichten
     else:
-        return [f"Fehler: {response.status_code} - {response.text}"]
-from textblob import TextBlob
-
-from textblob import TextBlob
-
-def bewerte_sentiment(text):
-    blob = TextBlob(text)
-    polarität = blob.sentiment.polarity  # Wert zwischen -1 (negativ) und +1 (positiv)
-
-    if polarität > 0.2:
-        return "🟢 Positiv"
-    elif polarität < -0.2:
-        return "🔴 Negativ"
-    else:
-        return "🟡 Neutral"
+        return [{"title": f"Fehler: {response.status_code}", "source": "System", "publishedAt": "", "url": ""}]
