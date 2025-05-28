@@ -59,8 +59,9 @@ with tabs[0]:
     st.markdown("## 🧠 <span style='color:#00bfa6'>Technische Analyse</span>", unsafe_allow_html=True)
     with st.container(border=True):
         if st.button("🚦 Analyse starten", key="analyse_button"):
-            signal, bewertung = analysiere_technik()
+            signal, bewertung, begruendung = analysiere_technik()
             st.markdown(f"**📈 Ergebnis:** `{signal}`")
+            st.markdown(f"**🧠 Begründung:** {begruendung}")
             st.dataframe(bewertung, use_container_width=True)
 
 # === TAB 2 – Entscheidung ===
@@ -72,12 +73,13 @@ with tabs[1]:
         heute = datetime.now().strftime("%Y-%m-%d")
 
         if st.button("📂 Entscheidung speichern", key="speichern_button"):
-            signal, _ = analysiere_technik()
+            signal, _, begruendung = analysiere_technik()
             neue_entscheidung = pd.DataFrame([{
                 "Datum": heute,
                 "KI-Signal": signal,
                 "Eigene Einschätzung": eigene,
-                "Kommentar": kommentar
+                "Kommentar": kommentar,
+                "Begründung": begruendung
             }])
             os.makedirs("data", exist_ok=True)
             try:
